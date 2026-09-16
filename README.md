@@ -28,7 +28,7 @@ This app plugs into all of the above. It does not replace ServiceTrade or Sage.
 |---|---|
 | Frontend | Next.js (App Router) |
 | Backend API | Node.js + Fastify |
-| Database | Tigris (MongoDB-compatible + S3-compatible object storage) |
+| Database | Fly Postgres (structured data) + Tigris S3 (files) |
 | Auth | JWT (access + refresh tokens) |
 | Hosting | Fly.io |
 | Repo | GitHub (`devonbooker/1stfp-alarm`) |
@@ -38,7 +38,7 @@ This app plugs into all of the above. It does not replace ServiceTrade or Sage.
 
 - [`docs/fieldwire-audit.md`](docs/fieldwire-audit.md) — Fieldwire feature-by-feature breakdown and what we're replicating
 - [`docs/architecture.md`](docs/architecture.md) — System architecture, service layout, data flow
-- [`docs/data-model.md`](docs/data-model.md) — Full Tigris collection schemas
+- [`docs/data-model.md`](docs/data-model.md) — Full Postgres table schemas + Tigris S3 key patterns
 - [`docs/api-design.md`](docs/api-design.md) — REST API endpoint reference
 - [`docs/fire-alarm-specifics.md`](docs/fire-alarm-specifics.md) — Fire alarm domain features (NFPA 72, device DB, AHJ, compliance)
 - [`docs/deployment.md`](docs/deployment.md) — Fly.io + Tigris setup and config
