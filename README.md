@@ -4,9 +4,23 @@ Internal and client-facing platform for fire alarm inspection, installation, and
 
 ## Goals
 
-**Internal**: Cut field technician admin time, standardize inspection documentation, track device-level service history.
+**Internal**: Eliminate duplicate data entry across field/office/accounting. Capture work once on site, flow it automatically to ServiceTrade, Sage Intacct, and BambooHR. 5,300 hours/year in estimated recovered capacity.
 
-**Revenue**: Sell as a SaaS to other fire protection contractors and as a client portal (inspection history, compliance status) to end customers.
+**Revenue lever #1**: 1,171 aged unquoted deficiencies = ~$761K repair opportunity. Deficiency-to-quote automation pushes findings directly to ServiceTrade service opportunities.
+
+**Revenue lever #2**: Compliance and inspection portal sold to property owners at $12K-$50K/yr recurring. Target: 54%+ of revenue from inspection/service/monitoring (APi Group benchmark).
+
+## Current Tech Stack at 1st FP
+
+| System | Purpose |
+|---|---|
+| ServiceTrade | Jobs, customers, invoicing (source of truth) |
+| Sage Intacct | Accounting |
+| BambooHR | HR/employees |
+| Microsoft 365 | Email, calendar |
+| Fieldwire | Field capture (being replaced by this app) |
+
+This app plugs into all of the above. It does not replace ServiceTrade or Sage.
 
 ## Tech Stack
 

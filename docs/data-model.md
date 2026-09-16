@@ -373,6 +373,14 @@ The fire alarm device database. One record per physical device.
   sensitivity: number | null,      // smoke detectors: %/ft
   sensitivity_last_checked: Date | null,
 
+  // QR code (permanent physical label on device)
+  qr_code_id: string,              // unique short ID, URL-safe (e.g., "d_abc123")
+  qr_code_printed: boolean,
+  qr_code_applied_date: Date | null,
+
+  // External integrations
+  servicetrade_asset_id: string,   // ServiceTrade asset ID if synced
+
   created_at: Date,
   updated_at: Date,
   deleted_at: Date | null,
@@ -656,6 +664,87 @@ Values of custom fields per task instance.
   entity_type: "task" | "project" | "form",
   entity_id: ObjectId,
   created_at: Date,
+}
+```
+
+### `closeout_packages`
+```typescript
+{
+  _id: ObjectId,
+  project_id: ObjectId,
+  generated_by_user_id: ObjectId,
+  status: "draft" | "sent" | "archived",
+
+  // What's included
+  included_form_ids: ObjectId[],
+  included_sheet_ids: ObjectId[],
+  include_device_inventory: boolean,
+  include_deficiency_log: boolean,
+  include_certificate: boolean,
+
+  // Generated file
+  pdf_key: string | null,          // Tigris key for bundled PDF
+  generated_at: Date | null,
+  sent_at: Date | null,
+  sent_to: string[],               // email addresses
+
+  // Billing trigger
+  billing_milestone_triggered: boolean,
+  sage_invoice_id: string | null,
+
+  created_at: Date,
+  updated_at: Date,
+}
+```
+
+### `servicetrade_sync`
+Tracks ServiceTrade integration state.
+```typescript
+{
+  _id: ObjectId,
+  account_id: ObjectId,
+
+  // Config
+  servicetrade_company_id: string,
+  api_key_encrypted: string,
+  sync_deficiencies: boolean,
+  sync_jobs: boolean,
+  sync_customers: boolean,
+
+  // Per-entity mappings
+  project_st_job_map: Record<string, string>,   // project_id → ST job ID
+  customer_st_map: Record<string, string>,       // project client → ST customer ID
+
+  last_sync_at: Date | null,
+  created_at: Date,
+  updated_at: Date,
+}
+```
+
+### `deficiency_quotes`
+Tracks the deficiency → quote conversion pipeline.
+```typescript
+{
+  _id: ObjectId,
+  project_id: ObjectId,
+  task_id: ObjectId,               // the deficiency task
+
+  // Quote state
+  quote_status: "pending" | "sent_to_st" | "customer_sent" | "accepted" | "declined" | "expired",
+  servicetrade_quote_id: string | null,
+  servicetrade_work_order_id: string | null,
+
+  // Estimate
+  estimated_value: number,
+  repair_scope: string,
+
+  // Aging notifications
+  days_open_at_last_notify: number,
+  last_notified_at: Date | null,
+  notified_user_ids: ObjectId[],
+
+  created_at: Date,
+  updated_at: Date,
 }
 ```
 

@@ -301,6 +301,59 @@ POST   /notifications/read-all
 
 ---
 
+## QR Code Scan
+
+Public endpoint - no auth required for initial info, auth required for full record.
+```
+GET    /scan/:qr_code_id            → device summary (public: property name, device type, last inspection date)
+GET    /scan/:qr_code_id/full       → full device record (requires auth)
+POST   /scan/:qr_code_id/log        → log a scan event (anonymous OK, used for audit trail)
+
+POST   /projects/:id/devices/qr-batch-print  { device_ids[] } → generate QR label PDF for batch printing
+```
+
+---
+
+## Closeout Packages
+
+```
+GET    /projects/:id/closeout-packages
+POST   /projects/:id/closeout-packages/generate   → compile current state into PDF bundle
+GET    /projects/:id/closeout-packages/:cid/status → checklist of what's complete vs. missing
+GET    /projects/:id/closeout-packages/:cid/download
+POST   /projects/:id/closeout-packages/:cid/send  { recipients[] }
+POST   /projects/:id/closeout-packages/:cid/trigger-billing  → push billing milestone to Sage
+```
+
+---
+
+## Deficiency-to-Quote Pipeline
+
+```
+GET    /deficiencies                → account-wide aged/unquoted deficiency dashboard
+GET    /projects/:id/deficiencies   → project-level (filter: unquoted, by_severity, aged_days)
+POST   /projects/:id/deficiencies/:task_id/create-quote   → push to ServiceTrade as service opportunity
+GET    /projects/:id/deficiencies/:task_id/quote          → get linked quote status
+PATCH  /projects/:id/deficiencies/:task_id/quote          → update estimated_value, repair_scope
+```
+
+---
+
+## ServiceTrade Integration
+
+```
+GET    /integrations/servicetrade/status
+POST   /integrations/servicetrade/configure   { api_key, company_id }
+POST   /integrations/servicetrade/sync        → manual sync trigger
+GET    /integrations/servicetrade/sync-log    → recent sync history
+
+POST   /integrations/servicetrade/push-deficiency/:task_id  → push one deficiency as ST quote
+GET    /integrations/servicetrade/jobs        → list ST jobs (for linking to projects)
+POST   /projects/:id/link-servicetrade-job    { st_job_id }
+```
+
+---
+
 ## Client Portal
 
 Separate auth scope for client users. Same API, filtered to their `account_id` and read-only.

@@ -213,6 +213,42 @@ Report templates in `apps/web/app/report-template/` — server-side rendered, pr
 
 ---
 
+## ServiceTrade Integration
+
+ServiceTrade is the source of truth for customers and jobs. This app is the field capture layer, not the job management layer.
+
+```
+ServiceTrade                     This app
+──────────────                   ──────────────────────
+Customer record       ←────      Read customer info for new project
+Job / Work Order      ←────      Link project to ST job
+                      ────→      Push deficiency as service opportunity quote
+                      ────→      Push closeout package completion (billing milestone trigger)
+Asset                 ←────      Read existing assets when building device DB
+```
+
+Implementation:
+- ServiceTrade REST API + API key (stored encrypted in `servicetrade_sync` collection)
+- Sync runs on: job creation, deficiency created, closeout sent, manual trigger
+- One-way mostly: ST → App for initial data, App → ST for deficiency quotes and billing triggers
+- Error handling: failed ST pushes queue for retry, visible in sync log
+
+## Sage Intacct Integration
+
+Read-only for now. Billing milestone triggers via webhook from ServiceTrade (not direct Sage API).
+
+Phase 2: Direct Sage API for project financial visibility in compliance dashboard.
+
+## BambooHR Integration
+
+Pull active employee list for technician assignment dropdowns. Sync on login + daily.
+
+## Microsoft 365 Integration
+
+Send inspection report emails via MS Graph API (uses company email domain).
+
+---
+
 ## Multi-tenancy
 
 Each account gets:
