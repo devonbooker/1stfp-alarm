@@ -4,24 +4,34 @@
 
 ## Overview
 
-Single-tenant SaaS initially (1st FP Alarm internal), multi-tenant later. Two-app monorepo: Next.js frontend + Fastify API backend. Tigris for both database and object storage. Deployed on Fly.io.
+**Correction from original design:** Tigris on Fly.io is S3-compatible object storage only — there is no MongoDB component. The database layer is **Fly Postgres**. Tigris handles files (plans, photos, PDFs, QR assets).
+
+Single-tenant initially (1st FP Alarm internal), multi-tenant later. Two-app monorepo: Next.js frontend + Fastify API. Fly Postgres for data, Tigris for files. Deployed on Fly.io.
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                         Fly.io                                 │
-│                                                                │
-│   ┌─────────────────┐        ┌──────────────────────────┐     │
-│   │  Next.js (web)  │ ──────▶│  Fastify API (api)       │     │
-│   │  Port 3000      │        │  Port 8080               │     │
-│   │  Fly Machine    │        │  Fly Machine (2x min)    │     │
-│   └─────────────────┘        └──────────┬───────────────┘     │
-│                                         │                      │
-│                               ┌─────────▼───────────┐         │
-│                               │  Tigris              │         │
-│                               │  MongoDB + S3        │         │
-│                               └─────────────────────┘         │
-└────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                           Fly.io                                │
+│                                                                 │
+│   ┌─────────────────┐        ┌───────────────────────────┐     │
+│   │  Next.js (web)  │ ──────▶│  Fastify API (api)        │     │
+│   │  Port 3000      │        │  Port 8080                │     │
+│   └─────────────────┘        └──────────┬────────────────┘     │
+│                                         │                       │
+│                              ┌──────────┼────────────┐         │
+│                              │          │            │         │
+│                    ┌─────────▼──┐  ┌────▼──────────┐ │         │
+│                    │ Fly Postgres│  │ Tigris (S3)   │ │         │
+│                    │ (data)      │  │ (files only)  │ │         │
+│                    └────────────┘  └───────────────┘ │         │
+│                                                       │         │
+└───────────────────────────────────────────────────────┘         │
+                                                                   │
+              ServiceTrade | Sage Intacct | BambooHR | M365       │
 ```
+
+**What lives where:**
+- **Fly Postgres**: all structured data (properties, devices, tasks, inspections, deficiencies, users, forms)
+- **Tigris (S3)**: floor plan PDFs, device photos, generated report PDFs, QR code PNGs, as-built exports
 
 ---
 

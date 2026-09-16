@@ -1,6 +1,8 @@
 # Deployment
 
-Fly.io for compute. Tigris for database + object storage. Both in the same Fly.io ecosystem.
+Fly.io for compute. **Fly Postgres for the database. Tigris for object storage (files only).** Both provisioned via Fly CLI.
+
+> **Correction from original design:** Tigris is S3 object storage, not MongoDB. The database is Fly Postgres.
 
 ---
 
@@ -16,9 +18,38 @@ fly auth login
 
 ---
 
-## Tigris Setup
+## Database Setup (Fly Postgres)
 
-Tigris runs as a Fly.io extension. All setup via `fly` CLI.
+Fly Postgres is a managed Postgres cluster running on Fly machines. Provisioned via CLI.
+
+```bash
+# Create Postgres cluster (start with single node for pilot)
+fly postgres create \
+  --name 1stfpalarm-db \
+  --region iad \
+  --vm-size shared-cpu-1x \
+  --volume-size 10
+
+# Outputs: DATABASE_URL (postgres connection string)
+# Save this — set it as a Fly secret on the API app
+```
+
+Attach to your API app:
+```bash
+fly postgres attach 1stfpalarm-db --app 1stfpalarm-api
+# This sets DATABASE_URL automatically as a secret on 1stfpalarm-api
+```
+
+Scale up later:
+```bash
+fly postgres update --vm-size performance-1x --app 1stfpalarm-db
+```
+
+---
+
+## Tigris Setup (Object Storage Only)
+
+Tigris is S3-compatible object storage. Used for floor plan PDFs, photos, reports, QR assets — not for application data.
 
 ### Object Storage Buckets
 
@@ -32,20 +63,13 @@ fly storage create --name 1stfpalarm-exports
 
 Each command outputs:
 ```
-TIGRIS_ACCESS_KEY_ID
-TIGRIS_SECRET_ACCESS_KEY
-TIGRIS_ENDPOINT_URL=https://fly.storage.tigris.dev
-TIGRIS_BUCKET_NAME
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_ENDPOINT_URL_S3=https://fly.storage.tigris.dev
+BUCKET_NAME
 ```
 
-Save these — you'll set them as Fly secrets.
-
-### MongoDB-compatible Database
-
-```bash
-fly tigris db create --name 1stfpalarm-db
-# Outputs: TIGRIS_URI (MongoDB connection string)
-```
+Save these per bucket — you'll set them as Fly secrets with `TIGRIS_` prefix.
 
 ---
 
@@ -65,11 +89,12 @@ fly launch --name 1stfpalarm-web --region iad --no-deploy
 
 ### Set secrets (API app)
 
+`DATABASE_URL` is set automatically by `fly postgres attach`. Set the rest manually:
+
 ```bash
 cd apps/api
 
 fly secrets set \
-  TIGRIS_URI="mongodb+srv://..." \
   TIGRIS_ACCESS_KEY_ID="..." \
   TIGRIS_SECRET_ACCESS_KEY="..." \
   TIGRIS_ENDPOINT_URL="https://fly.storage.tigris.dev" \
